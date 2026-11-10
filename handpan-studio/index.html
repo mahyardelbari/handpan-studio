@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10131c">
+  <title>Handpan Studio | استودیوی هنگ‌درام</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="صفحه اصلی">
+        <span class="brand-icon">◉</span>
+        <span><b>Handpan</b><small>STUDIO</small></span>
+      </a>
+
+      <nav class="navigation">
+        <button class="nav active" data-page="play">◉ <span>نواختن</span></button>
+        <button class="nav" data-page="songs">♫ <span>کتابخانه قطعه‌ها</span></button>
+        <button class="nav" data-page="learn">▤ <span>آموزش</span></button>
+        <button class="nav" data-page="generator">✳ <span>بداهه‌نوازی</span></button>
+        <button class="nav" data-page="instrument">⚙ <span>ساز من</span></button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="status"><span id="audioDot"></span><span id="audioLabel">صدا آماده است</span></div>
+        <div class="mini-card">
+          <span class="eyebrow">کوک فعال</span>
+          <b id="sideScale">D Kurd</b>
+          <small id="lastNote">آخرین نت: —</small>
+        </div>
+        <p class="muted tiny">نسخه 2.1 · Handpan Studio</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">استودیوی موسیقی تو</span>
+          <h1 id="pageTitle">نواختن هنگ‌درام</h1>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" id="fullBtn" title="تمام‌صفحه‌ی ساز">⛶</button>
+          <span class="pill"><span class="live-dot"></span> آماده نواختن</span>
+          <button class="icon-button" id="helpBtn" title="راهنما">?</button>
+        </div>
+      </header>
+
+      <section class="page active" id="page-play">
+        <div class="hero">
+          <div class="hero-copy">
+            <span class="eyebrow">VIRTUAL INSTRUMENT</span>
+            <h2>صدای خودت را پیدا کن.</h2>
+            <p>بنواز، گوش بده، تمرین کن و ملودی‌های خودت را بساز.</p>
+            <div class="hero-meta">
+              <span>♪ <b id="scaleLabel">D Kurd</b></span>
+              <span>◉ <b id="countLabel">9</b> نت</span>
+              <span>♩ <b id="tempoLabel">90</b> BPM</span>
+            </div>
+          </div>
+          <div class="hero-mark">◉</div>
+        </div>
+
+        <div class="panel instrument-panel">
+          <div class="section-heading">
+            <div><h2>هنگ‌درام مجازی</h2><p>روی نت‌ها کلیک کن یا از کلیدهای ۰ تا ۹، <b>-</b> و <b>=</b> استفاده کن. عدد هر کلید همان عددی است که در نت‌نویسی قطعه‌ها آمده.</p></div>
+            <button class="secondary" id="droneBtn">〰 درون خاموش</button>
+          </div>
+          <div class="instrument-stage">
+            <!-- کلیدها (۰ تا ۱۱) با جاوااسکریپت ساخته و چیده می‌شوند؛ هر عدد فقط یک بار می‌آید -->
+            <div class="handpan" id="handpan">
+              <div class="ding"><b id="dingName">D</b><small>ding</small></div>
+            </div>
+          </div>
+          <div class="instrument-footer">
+            <span class="muted" id="nextHand">دست راست</span>
+            <span class="muted" id="nextName">D3</span>
+            <label class="volume-control">🔊 <input id="volume" type="range" min="0" max="100" value="70"><span id="volumeValue">70%</span></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-heading">
+            <div><h2 id="timelineTitle">نوار نت‌ها</h2><p id="timelineSubtitle">یک قطعه انتخاب کن یا آزادانه بنواز.</p></div>
+            <div class="inline-actions">
+              <button class="secondary" id="saveBtn">ذخیره الگو</button>
+              <button class="secondary danger" id="clearBtn">پاک کردن</button>
+            </div>
+          </div>
+
+          <div class="transport">
+            <button class="transport-btn" id="prevBtn" title="نت قبلی">|◀</button>
+            <button class="transport-btn" id="backBtn" title="۴ ثانیه عقب">−4s</button>
+            <button class="play-btn" id="playBtn" title="پخش / مکث">▶</button>
+            <button class="transport-btn" id="stopBtn" title="توقف و بازگشت">■</button>
+            <button class="transport-btn" id="forwardBtn" title="۴ ثانیه جلو">+4s</button>
+            <button class="transport-btn" id="nextBtn" title="نت بعدی">▶|</button>
+            <span class="time-display"><b id="currentTime">00:00</b> / <span id="totalTime">00:00</span></span>
+          </div>
+
+          <input id="seek" class="seek" type="range" min="0" max="1000" value="0" aria-label="موقعیت پخش">
+
+          <div class="timeline-scroll" id="timelineScroll">
+            <div class="timeline-ruler" id="timelineRuler"></div>
+            <div class="timeline-lane" id="noteLane"></div>
+            <div class="playhead" id="playhead"></div>
+          </div>
+
+          <div class="player-options">
+            <label>سرعت
+              <select id="speed">
+                <option value="0.5">50%</option>
+                <option value="0.75">75%</option>
+                <option value="1" selected>100%</option>
+                <option value="1.25">125%</option>
+                <option value="1.5">150%</option>
+              </select>
+            </label>
+            <label>تمپو
+              <input id="bpm" type="number" min="30" max="220" value="90">
+              <span>BPM</span>
+            </label>
+            <label class="check-option"><input id="loop" type="checkbox"> تکرار</label>
+            <button class="secondary" id="metronomeBtn">♩ مترونوم خاموش</button>
+            <button class="secondary" id="practiceBtn" title="منتظر نت درست می‌ماند (P)">🎯 حالت تمرین</button>
+            <button class="secondary" id="abBtn" title="نقطه‌ی شروع، پایان، پاک کردن (A)">A–B</button>
+            <button class="secondary" id="recBtn" title="ضبط با شمارش ۴ ضربه (R)">⏺ ضبط</button>
+            <button class="secondary" id="tapBtn" title="چند بار پشت‌سرهم بزن">👆 تپ تمپو</button>
+            <button class="secondary" id="midiBtn" title="ذخیره‌ی الگو به‌صورت فایل MIDI">⬇ خروجی MIDI</button>
+          </div>
+          <p class="practice-stats muted tiny" id="practiceStats"></p>
+          <p class="muted tiny">روی هر بلوک نت کلیک کن تا پخش از همان نقطه ادامه پیدا کند. عدد بزرگ هر بلوک، شماره‌ی همان کلید روی ساز است. پس از بارگذاری قطعه، کلیدهای مورد استفاده‌ی آن مشخص می‌شوند.</p>
+        </div>
+
+        <div class="panel">
+          <div class="section-heading"><div><h2>الگوها و ضبط‌های من</h2><p>الگوهای ذخیره‌شده و ضبط‌های زنده؛ شنیدن، بارگذاری، خروجی MIDI یا حذف.</p></div></div>
+          <div id="savedList" class="saved-list"></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-songs">
+        <div class="page-intro">
+          <span class="eyebrow">MUSIC LIBRARY</span>
+          <h2>کتابخانه قطعه‌ها</h2>
+          <p>یک ملودی انتخاب کن و آن را با ساز خودت تمرین کن.</p>
+        </div>
+        <div class="filters">
+          <input id="songSearch" type="search" placeholder="جست‌وجوی قطعه...">
+          <select id="songFilter">
+            <option value="all">همه سطح‌ها</option>
+            <option value="آسان">آسان</option>
+            <option value="متوسط">متوسط</option>
+          </select>
+        </div>
+        <div class="card-grid" id="songGrid"></div>
+      </section>
+
+      <section class="page" id="page-learn">
+        <div class="page-intro">
+          <span class="eyebrow">LEARN BY PLAYING</span>
+          <h2>قدم‌به‌قدم یاد بگیر</h2>
+          <p>از شناخت نت‌ها تا ساخت اولین جمله موسیقایی.</p>
+        </div>
+        <div class="card-grid" id="lessonGrid"></div>
+        <div class="panel theory-panel">
+          <h2>راهنمای کشش نت‌ها</h2>
+          <div class="notation-grid">
+            <div><b>𝅝</b><strong>گرد</strong><small>۴ ضرب</small></div>
+            <div><b>𝅗𝅥</b><strong>سفید</strong><small>۲ ضرب</small></div>
+            <div><b>♩</b><strong>سیاه</strong><small>۱ ضرب</small></div>
+            <div><b>♪</b><strong>چنگ</strong><small>نیم ضرب</small></div>
+            <div><b>𝅘𝅥𝅯</b><strong>دولاچنگ</strong><small>یک‌چهارم ضرب</small></div>
+            <div><b>𝄽</b><strong>سکوت سیاه</strong><small>۱ ضرب بدون صدا</small></div>
+          </div>
+          <p class="muted">در میزان ۴/۴، یک ضرب برابر یک نت سیاه است. کشش‌ها با تغییر BPM تغییر می‌کنند؛ طنین هنگ‌درام می‌تواند از مدت نوشته‌شده بیشتر باشد.</p>
+        </div>
+      </section>
+
+      <section class="page" id="page-generator">
+        <div class="page-intro">
+          <span class="eyebrow">IMPROVISATION LAB</span>
+          <h2>ملودی خودت را بساز</h2>
+          <p>پارامترها را انتخاب کن و یک الگوی تازه تولید کن.</p>
+        </div>
+
+        <div class="panel generator-panel">
+          <div class="form-grid">
+            <label>حس موسیقی
+              <select id="mood">
+                <option value="calm">آرام و مراقبه‌ای</option>
+                <option value="dreamy">رویایی</option>
+                <option value="happy">شاد و روشن</option>
+                <option value="mystery">مرموز</option>
+                <option value="rhythm">ریتمیک</option>
+              </select>
+            </label>
+            <label>پیچیدگی
+              <select id="complexity">
+                <option value="simple">ساده</option>
+                <option value="medium" selected>متوسط</option>
+                <option value="rich">متنوع</option>
+              </select>
+            </label>
+            <label>تعداد ضرب
+              <select id="length">
+                <option value="16">۱۶ ضرب</option>
+                <option value="32" selected>۳۲ ضرب</option>
+                <option value="48">۴۸ ضرب</option>
+                <option value="64">۶۴ ضرب</option>
+              </select>
+            </label>
+            <label>سرعت: <span id="genTempoLabel">80</span> BPM
+              <input id="genTempo" type="range" min="40" max="140" value="80">
+            </label>
+            <label class="check-option"><input id="useDing" type="checkbox" checked> بازگشت به نت مرکزی</label>
+          </div>
+          <div class="inline-actions">
+            <button class="primary" id="generateBtn">✳ ساخت بداهه</button>
+            <button class="secondary" id="newGenBtn">ساخت نسخه دیگر</button>
+            <button class="secondary" id="playGenBtn">▶ پخش بداهه</button>
+            <button class="secondary" id="sendGenBtn">انتقال به نوار پخش</button>
+          </div>
+          <div class="generated-heading"><h3 id="generatedTitle">بداهه‌ی تو</h3><span id="generatedInfo" class="muted">هنوز چیزی تولید نشده</span></div>
+          <div class="generated-notes" id="generatedNotes"></div>
+          <p class="muted tiny">برای شنیدن و انتخاب یک نت، روی کارت آن کلیک کن؛ کلیک دوباره، نت را عوض می‌کند. برای شنیدن نتیجه، روی «پخش بداهه» بزن.</p>
+        </div>
+      </section>
+
+      <section class="page" id="page-instrument">
+        <div class="page-intro">
+          <span class="eyebrow">INSTRUMENT DESIGN</span>
+          <h2>ساز من</h2>
+          <p>کوک و ظاهر ساز مجازی را شخصی‌سازی کن.</p>
+        </div>
+
+        <div class="panel">
+          <div class="form-grid">
+            <label>کوک
+              <select id="preset">
+                <option value="kurd">D Kurd</option>
+                <option value="minor">A Minor</option>
+                <option value="celtic">D Celtic</option>
+                <option value="major">C Major</option>
+                <option value="bella">E Minor (Bella Ciao)</option>
+                <option value="dorian">E Dorian (Scarborough Fair)</option>
+                <option value="risingsun">A Minor (House of the Rising Sun)</option>
+                <option value="em">E Minor (Greensleeves)</option>
+                <option value="custom">کوک سفارشی</option>
+              </select>
+            </label>
+            <label>نت پایه
+              <select id="root">
+                <option>C</option><option>C#</option><option>D</option>
+                <option>D#</option><option>E</option><option>F</option>
+                <option>F#</option><option>G</option><option>G#</option>
+                <option>A</option><option>A#</option><option>B</option>
+              </select>
+            </label>
+            <label>اکتاو
+              <select id="octave">
+                <option value="2">2</option><option value="3" selected>3</option>
+                <option value="4">4</option><option value="5">5</option>
+              </select>
+            </label>
+            <label>تعداد نت‌ها
+              <select id="noteCountSelect">
+                <option>5</option><option>7</option><option selected>9</option>
+                <option>10</option><option>12</option>
+              </select>
+            </label>
+            <label>رنگ صدا
+              <select id="timbre">
+                <option value="warm">گرم</option>
+                <option value="bright">روشن</option>
+                <option value="deep">بم</option>
+                <option value="metal">فلزی</option>
+              </select>
+            </label>
+            <label>طنین: <span id="sustainLabel">2.2 ثانیه</span>
+              <input id="sustain" type="range" min="0.4" max="5" step="0.1" value="2.2">
+            </label>
+            <label>ریورب: <span id="reverbLabel">30%</span>
+              <input id="reverb" type="range" min="0" max="80" value="30">
+            </label>
+            <label>تنظیم دقیق: <span id="fineLabel">0 سنت</span>
+              <input id="fineTune" type="range" min="-50" max="50" value="0">
+            </label>
+            <label>چیدمان
+              <select id="layout">
+                <option value="circle">دایره‌ای</option>
+                <option value="compact">فشرده</option>
+              </select>
+            </label>
+          </div>
+          <div class="inline-actions">
+            <button class="primary" id="applyInstrument">اعمال تغییرات</button>
+            <button class="secondary" id="resetInstrument">بازنشانی</button>
+            <button class="secondary" id="exportSettings">خروجی تنظیمات JSON</button>
+            <label class="secondary file-label">وارد کردن JSON
+              <input id="importSettings" type="file" accept=".json,application/json">
+            </label>
+          </div>
+          <p class="muted tiny">تعداد نت‌ها حداکثر برابر تعداد درجات همان کوک است (نت تکراری ساخته نمی‌شود).</p>
+        </div>
+
+        <div class="panel">
+          <div class="section-heading"><div><h2>کوک دقیق نت‌ها</h2><p>فرکانس هر نت را بر حسب هرتز تغییر بده.</p></div><button class="secondary" id="resetTuning">بازنشانی فرکانس‌ها</button></div>
+          <div id="tuningList" class="tuning-list"></div>
+          <p class="muted tiny">فرکانس‌های قابل تنظیم، مدل صوتی مجازی را تغییر می‌دهند؛ این تنظیمات ساز فیزیکی را کوک نمی‌کنند.</p>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>Handpan Studio</span>
+        <span>ساخته شده برای تمرین، خلاقیت و کشف موسیقی</span>
+      </footer>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <dialog id="helpDialog">
+    <div class="dialog-content">
+      <button class="icon-button dialog-close" id="closeHelp">×</button>
+      <h2>راهنمای سریع</h2>
+      <p>برای شروع، یک نت از ساز بزن یا از کتابخانه قطعه انتخاب کن.</p>
+      <ul>
+        <li>Space: پخش یا مکث</li>
+        <li>۰ تا ۹ و - و =: نواختن نت‌های ۰ تا ۱۱ (۰ = دینگ)</li>
+        <li>Escape: توقف پخش و تمرین</li>
+        <li>روی نوار نت کلیک کن تا به همان رویداد بروی.</li>
+        <li>P: تمرین · R: ضبط · A: حلقه‌ی A–B · M: مترونوم · D: درون · L: تکرار</li>
+        <li>ویرگول و نقطه: کم و زیاد کردن سرعت پخش</li>
+        <li>از بخش «ساز من» برای تغییر کوک و صدا استفاده کن.</li>
+      </ul>
+      <button class="primary" id="closeHelpBottom">متوجه شدم</button>
+    </div>
+  </dialog>
+</body>
+</html>
